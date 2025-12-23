@@ -1,7 +1,7 @@
 import axios from 'axios'
 const AUTH_STORAGE_KEY = 'sandbox_auth_key'
 const request = axios.create({
-  baseURL: import.meta.env.VITE_PROXY_BASE_URL || 'https://107.174.50.174:8787',
+  baseURL: import.meta.env.VITE_PROXY_BASE_URL || 'web-edit-server.vercel.app',
   timeout: 20000,
 })
 
