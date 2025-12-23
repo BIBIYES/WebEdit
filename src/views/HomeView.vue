@@ -3,9 +3,17 @@ import { h, onMounted, ref } from 'vue'
 import { ArrowUpOutlined, CodeOutlined, CloseCircleOutlined } from '@ant-design/icons-vue'
 import { notification } from 'ant-design-vue'
 import WebEidt from '@/components/WebEidt.vue'
-import { healthCheck } from '@/api/sandboxApi'
+import { healthCheck, runCode } from '@/api/sandboxApi'
 const isConsoleOpen = ref(true)
 const codeType = ref('java')
+const editorCode = ref(`import java.util.*;
+
+public class Main {
+  public static void main(String[] args) {
+    System.out.println("Hello, Java in Monaco!");
+  }
+}`)
+const consoleText = ref('')
 
 // 健康检查
 const handleHealthCheck = async () => {
@@ -13,11 +21,41 @@ const handleHealthCheck = async () => {
     console.log('正在进行健康检查...')
     const res = await healthCheck()
     console.log('健康检查成功：', res.data)
+    notification.success({
+      message: '健康检查成功',
+      description: '沙箱服务连接正常。',
+      placement: 'topRight',
+      duration: 3,
+    })
   } catch (error) {
     console.error('健康检查失败：', error)
     notification.error({
       message: '健康检查失败',
       description: '无法连接至沙箱服务，请稍后重试。',
+      placement: 'topRight',
+      duration: 3,
+    })
+  }
+}
+
+const handleRun = async () => {
+  try {
+    const res = await runCode({
+      language: codeType.value,
+      code: editorCode.value,
+    })
+    consoleText.value = JSON.stringify(res.data, null, 2)
+    notification.success({
+      message: '提交成功',
+      description: '代码已提交至沙箱执行。',
+      placement: 'topRight',
+      duration: 2,
+    })
+  } catch (error) {
+    console.error('提交失败：', error)
+    notification.error({
+      message: '提交失败',
+      description: '接口调用失败，请稍后重试。',
       placement: 'topRight',
       duration: 3,
     })
@@ -66,14 +104,13 @@ onMounted(() => {
       <div class="action">
         <a-button :icon="h(CodeOutlined)" @click="isConsoleOpen = !isConsoleOpen"> 控制台</a-button>
         <a-select v-model:value="codeType" style="width: 120px">
-          <a-select-option value="javascript">javascript</a-select-option>
           <a-select-option value="java">java</a-select-option>
-          <a-select-option value="python">python</a-select-option>
+          <a-select-option value="c">c</a-select-option>
         </a-select>
-        <a-button :icon="h(ArrowUpOutlined)"> 提交</a-button>
+        <a-button :icon="h(ArrowUpOutlined)" @click="handleRun"> 提交</a-button>
       </div>
       <div class="editor-pane">
-        <WebEidt />
+        <WebEidt v-model="editorCode" :language="codeType" />
       </div>
       <div class="console" v-if="isConsoleOpen">
         <div class="console-hander">
@@ -82,6 +119,7 @@ onMounted(() => {
             ><CloseCircleOutlined
           /></span>
         </div>
+        <pre class="console-body">{{ consoleText }}</pre>
       </div>
     </div>
   </div>
@@ -100,6 +138,15 @@ onMounted(() => {
   border-top: 3px #b39c84 solid;
   display: flex;
   flex-direction: column;
+}
+.console-body {
+  padding: 10px 12px;
+  margin: 0;
+  overflow: auto;
+  font-size: 12px;
+  line-height: 1.4;
+  color: #2b2620;
+  font-family: 'SFMono-Regular', Menlo, Consolas, 'Liberation Mono', monospace;
 }
 .console-hander {
   padding: 8px 12px;

@@ -1,8 +1,7 @@
 import axios from 'axios'
 const request = axios.create({
-  baseURL: 'https://bytecourt.cn-hongkong.kitasoda.com/api',
+  baseURL: import.meta.env.VITE_PROXY_BASE_URL || 'http://localhost:8787',
   timeout: 1000,
-  headers: { 'x-auth': import.meta.env.VITE_SANDBOX_KEY },
 })
 
 // Add a request interceptor

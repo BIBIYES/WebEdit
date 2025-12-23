@@ -4,3 +4,8 @@ import request from '@/utils/request'
 export const healthCheck = () => {
   return request.get('/')
 }
+
+// 提交代码执行
+export const runCode = (payload) => {
+  return request.post('/run', payload)
+}

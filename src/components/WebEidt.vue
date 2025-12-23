@@ -1,14 +1,24 @@
 <script setup>
 import { CodeEditor } from 'monaco-editor-vue3'
-import { ref } from 'vue'
+import { computed } from 'vue'
 
-const code = ref(`import java.util.*;
+const props = defineProps({
+  modelValue: {
+    type: String,
+    required: true,
+  },
+  language: {
+    type: String,
+    default: 'java',
+  },
+})
 
-public class Main {
-  public static void main(String[] args) {
-    System.out.println("Hello, Java in Monaco!");
-  }
-}`)
+const emit = defineEmits(['update:modelValue'])
+
+const code = computed({
+  get: () => props.modelValue,
+  set: (value) => emit('update:modelValue', value),
+})
 
 const editorOptions = {
   fontSize: 14,
@@ -23,7 +33,7 @@ const editorOptions = {
   <div class="app">
     <CodeEditor
       v-model:value="code"
-      language="java"
+      :language="language"
       theme="vs-dark"
       :options="editorOptions"
       class="editor"
