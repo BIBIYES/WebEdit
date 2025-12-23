@@ -162,6 +162,7 @@ onMounted(() => {
         <a-select v-model:value="codeType" style="width: 120px">
           <a-select-option value="java">java</a-select-option>
           <a-select-option value="c">c</a-select-option>
+          <a-select-option value="python">python</a-select-option>
         </a-select>
         <a-button :icon="h(ArrowUpOutlined)" :loading="isSubmitting" @click="handleRun">
           提交

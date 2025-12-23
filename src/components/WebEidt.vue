@@ -34,6 +34,7 @@ const editorOptions = {
     <CodeEditor
       v-model:value="code"
       :language="language"
+      :key="language"
       theme="vs-dark"
       :options="editorOptions"
       class="editor"
