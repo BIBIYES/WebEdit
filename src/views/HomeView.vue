@@ -1,9 +1,17 @@
 <script setup>
 import { h, onMounted, ref } from 'vue'
-import { ArrowUpOutlined, CodeOutlined, CloseCircleOutlined } from '@ant-design/icons-vue'
+import {
+  ArrowUpOutlined,
+  CodeOutlined,
+  CloseCircleOutlined,
+  DeleteOutlined,
+  LogoutOutlined,
+} from '@ant-design/icons-vue'
 import { notification } from 'ant-design-vue'
 import WebEidt from '@/components/WebEidt.vue'
 import { healthCheck, runCode } from '@/api/sandboxApi'
+import { useRouter } from 'vue-router'
+const AUTH_STORAGE_KEY = 'sandbox_auth_key'
 const isConsoleOpen = ref(true)
 const codeType = ref('java')
 const editorCode = ref(`import java.util.*;
@@ -13,7 +21,9 @@ public class Main {
     System.out.println("Hello, Java in Monaco!");
   }
 }`)
-const consoleText = ref('')
+const runLogs = ref([])
+const isSubmitting = ref(false)
+const router = useRouter()
 
 // 健康检查
 const handleHealthCheck = async () => {
@@ -35,31 +45,77 @@ const handleHealthCheck = async () => {
       placement: 'topRight',
       duration: 3,
     })
+    localStorage.removeItem(AUTH_STORAGE_KEY)
+    router.push({ name: 'login' })
   }
 }
 
 const handleRun = async () => {
   try {
+    isSubmitting.value = true
     const res = await runCode({
       language: codeType.value,
       code: editorCode.value,
     })
-    consoleText.value = JSON.stringify(res.data, null, 2)
+    const payload = res?.data || {}
+    const message = payload?.message || {}
+    const metadata = message?.metadata || {}
+    const traceId = payload?.traceId || `local_${Date.now()}`
+    const traceDate = traceId.split('_')[0] || new Date().toISOString()
+
+    runLogs.value.push({
+      id: traceId,
+      traceId,
+      time: traceDate,
+      status: payload?.status || 'UNKNOWN',
+      exitCode: metadata?.exitCode ?? null,
+      oom: metadata?.oom ?? false,
+      stdout: message?.stdout || '',
+      stderr: message?.stderr || '',
+    })
     notification.success({
       message: '提交成功',
-      description: '代码已提交至沙箱执行。',
+      description: '执行完成',
       placement: 'topRight',
       duration: 2,
     })
   } catch (error) {
     console.error('提交失败：', error)
+    if (error?.response?.status === 401) {
+      localStorage.removeItem(AUTH_STORAGE_KEY)
+      router.push({ name: 'login' })
+      notification.error({
+        message: '密钥失效',
+        description: '请重新验证密钥。',
+        placement: 'topRight',
+        duration: 3,
+      })
+      return
+    }
     notification.error({
       message: '提交失败',
       description: '接口调用失败，请稍后重试。',
       placement: 'topRight',
       duration: 3,
     })
+  } finally {
+    isSubmitting.value = false
   }
+}
+
+const handleDeleteLog = (logId) => {
+  runLogs.value = runLogs.value.filter((item) => item.id !== logId)
+}
+
+const formatTraceTime = (isoTime) => {
+  const date = new Date(isoTime)
+  if (Number.isNaN(date.getTime())) return isoTime
+  return date.toLocaleString()
+}
+
+const handleLogout = () => {
+  localStorage.removeItem(AUTH_STORAGE_KEY)
+  router.push({ name: 'login' })
 }
 
 onMounted(() => {
@@ -107,19 +163,57 @@ onMounted(() => {
           <a-select-option value="java">java</a-select-option>
           <a-select-option value="c">c</a-select-option>
         </a-select>
-        <a-button :icon="h(ArrowUpOutlined)" @click="handleRun"> 提交</a-button>
+        <a-button :icon="h(ArrowUpOutlined)" :loading="isSubmitting" @click="handleRun">
+          提交
+        </a-button>
+        <a-button :icon="h(LogoutOutlined)" @click="handleLogout">退出</a-button>
       </div>
       <div class="editor-pane">
         <WebEidt v-model="editorCode" :language="codeType" />
       </div>
-      <div class="console" v-if="isConsoleOpen">
+      <div class="console" v-show="isConsoleOpen">
         <div class="console-hander">
           <a-space><CodeOutlined />控制台</a-space>
           <span style="cursor: pointer" @click="isConsoleOpen = !isConsoleOpen"
             ><CloseCircleOutlined
           /></span>
         </div>
-        <pre class="console-body">{{ consoleText }}</pre>
+        <div class="console-body">
+          <div class="console-empty" v-if="runLogs.length === 0">暂无执行记录</div>
+          <div
+            class="console-log"
+            :class="{ 'console-log-error': log.exitCode === 1 }"
+            v-for="log in runLogs"
+            :key="log.id"
+          >
+            <div class="console-log-header">
+              <div class="console-log-title">
+                <span class="console-log-time">{{ formatTraceTime(log.time) }}</span>
+                <span class="console-log-status">{{ log.status }}</span>
+                <span class="console-log-meta">
+                  exitCode: {{ log.exitCode === null ? '-' : log.exitCode }}
+                </span>
+                <span class="console-log-meta">oom: {{ log.oom ? 'true' : 'false' }}</span>
+              </div>
+              <a-button
+                type="text"
+                size="small"
+                :icon="h(DeleteOutlined)"
+                @click="handleDeleteLog(log.id)"
+              />
+            </div>
+            <div class="console-log-body">
+              <div class="console-log-block">
+                <div class="console-log-label">stdout</div>
+                <pre class="console-log-output">{{ log.stdout || '（空）' }}</pre>
+              </div>
+              <div class="console-log-block">
+                <div class="console-log-label">stderr</div>
+                <pre class="console-log-output">{{ log.stderr || '（空）' }}</pre>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -147,6 +241,64 @@ onMounted(() => {
   line-height: 1.4;
   color: #2b2620;
   font-family: 'SFMono-Regular', Menlo, Consolas, 'Liberation Mono', monospace;
+}
+.console-empty {
+  color: #7b6e61;
+}
+.console-log {
+  border: 1px solid #e2d6c8;
+  border-radius: 6px;
+  padding: 8px;
+  background: #fffdf8;
+  margin-bottom: 10px;
+}
+.console-log-error {
+  border-color: #e4b3b3;
+  background: #fff3f3;
+}
+.console-log-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  padding-bottom: 6px;
+  border-bottom: 1px dashed #e2d6c8;
+}
+.console-log-title {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  font-size: 12px;
+}
+.console-log-time {
+  color: #4f4338;
+}
+.console-log-status {
+  font-weight: 600;
+  color: #3f3328;
+}
+.console-log-meta {
+  color: #6b5b4b;
+}
+.console-log-body {
+  padding-top: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.console-log-label {
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: #6b5b4b;
+  font-size: 11px;
+}
+.console-log-output {
+  margin: 4px 0 0 0;
+  padding: 6px 8px;
+  background: #f4ede4;
+  border-radius: 4px;
+  white-space: pre-wrap;
+  word-break: break-word;
 }
 .console-hander {
   padding: 8px 12px;

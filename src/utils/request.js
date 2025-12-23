@@ -1,13 +1,18 @@
 import axios from 'axios'
+const AUTH_STORAGE_KEY = 'sandbox_auth_key'
 const request = axios.create({
-  baseURL: import.meta.env.VITE_PROXY_BASE_URL || 'http://localhost:8787',
-  timeout: 1000,
+  baseURL: import.meta.env.VITE_PROXY_BASE_URL || 'http://107.174.50.174:8787',
+  timeout: 20000,
 })
 
 // Add a request interceptor
 request.interceptors.request.use(
   function (config) {
     // Do something before request is sent
+    const authKey = localStorage.getItem(AUTH_STORAGE_KEY)
+    if (authKey) {
+      config.headers['x-auth'] = authKey
+    }
     return config
   },
   function (error) {
