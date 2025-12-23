@@ -125,7 +125,7 @@ onMounted(() => {
 
 <template>
   <div class="app">
-    <div class="problem-details">
+    <!-- <div class="problem-details">
       <h2>题目：太空羊驼的时间折叠器</h2>
       <p>
         传说中有一台只接受 Java 语法输入的时间折叠器。它会把输入的数字序列变成一只
@@ -155,7 +155,7 @@ onMounted(() => {
       >
       <h3>说明</h3>
       <p>数据量巨大且规则诡异，请在 O(N log N) 或更快的复杂度内解决。</p>
-    </div>
+    </div> -->
     <div class="web-edit">
       <div class="action">
         <a-button :icon="h(CodeOutlined)" @click="isConsoleOpen = !isConsoleOpen"> 控制台</a-button>
@@ -330,6 +330,7 @@ onMounted(() => {
   color: #2b2620;
   padding: 20px 18px;
   overflow: auto;
+  visibility: inherit;
 
   line-height: 1.6;
   font-size: 14px;
@@ -361,7 +362,7 @@ onMounted(() => {
 }
 
 .web-edit {
-  width: 70%;
+  width: 100%;
   height: 100%;
   display: flex;
   flex-direction: column;
