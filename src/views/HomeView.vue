@@ -1,5 +1,5 @@
 <script setup>
-import { h, onMounted, ref } from 'vue'
+import { h, onMounted, ref, watch } from 'vue'
 import {
   ArrowUpOutlined,
   CodeOutlined,
@@ -14,13 +14,32 @@ import { useRouter } from 'vue-router'
 const AUTH_STORAGE_KEY = 'sandbox_auth_key'
 const isConsoleOpen = ref(true)
 const codeType = ref('java')
-const editorCode = ref(`import java.util.*;
+
+const defaultCodeTemplates = {
+  java: `import java.util.*;
 
 public class Main {
   public static void main(String[] args) {
     System.out.println("Hello, Java in Monaco!");
   }
-}`)
+}`,
+  c: `#include <stdio.h>
+
+int main() {
+    printf("Hello, C in Monaco!\\n");
+    return 0;
+}`,
+  python: `print("Hello, Python in Monaco!")`,
+  nodejs: `console.log("Hello, Node.js in Monaco!");`,
+}
+
+const editorCode = ref(defaultCodeTemplates.java)
+
+watch(codeType, (newLang) => {
+  if (defaultCodeTemplates[newLang]) {
+    editorCode.value = defaultCodeTemplates[newLang]
+  }
+})
 const runLogs = ref([])
 const isSubmitting = ref(false)
 const router = useRouter()
@@ -163,6 +182,7 @@ onMounted(() => {
           <a-select-option value="java">java</a-select-option>
           <a-select-option value="c">c</a-select-option>
           <a-select-option value="python">python</a-select-option>
+          <a-select-option value="nodejs">nodejs</a-select-option>
         </a-select>
         <a-button :icon="h(ArrowUpOutlined)" :loading="isSubmitting" @click="handleRun">
           提交

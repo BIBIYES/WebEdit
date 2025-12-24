@@ -20,6 +20,11 @@ const code = computed({
   set: (value) => emit('update:modelValue', value),
 })
 
+const editorLanguage = computed(() => {
+  if (props.language === 'nodejs') return 'javascript'
+  return props.language
+})
+
 const editorOptions = {
   fontSize: 14,
   minimap: { enabled: true },
@@ -33,8 +38,8 @@ const editorOptions = {
   <div class="app">
     <CodeEditor
       v-model:value="code"
-      :language="language"
-      :key="language"
+      :language="editorLanguage"
+      :key="editorLanguage"
       theme="vs-dark"
       :options="editorOptions"
       class="editor"
