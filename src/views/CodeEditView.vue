@@ -6,6 +6,7 @@ import {
   CloseCircleOutlined,
   DeleteOutlined,
   LogoutOutlined,
+  DesktopOutlined,
 } from '@ant-design/icons-vue'
 import { notification } from 'ant-design-vue'
 import WebEidt from '@/components/WebEidt.vue'
@@ -137,6 +138,10 @@ const handleLogout = () => {
   router.push({ name: 'login' })
 }
 
+const handleOpenTerminal = () => {
+  router.push({ name: 'TerminalEmulator' })
+}
+
 onMounted(() => {
   handleHealthCheck()
 })
@@ -188,6 +193,9 @@ onMounted(() => {
           提交
         </a-button>
         <a-button :icon="h(LogoutOutlined)" @click="handleLogout">退出</a-button>
+        <a-button :icon="h(DesktopOutlined)" @click="handleOpenTerminal" style="margin-left: auto">
+          终端模拟器</a-button
+        >
       </div>
       <div class="editor-pane">
         <WebEidt v-model="editorCode" :language="codeType" />

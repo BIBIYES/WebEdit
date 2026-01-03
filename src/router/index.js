@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import HomeView from '../views/HomeView.vue'
+import CodeEditView from '../views/CodeEditView.vue'
 import LoginView from '../views/LoginView.vue'
+import TerminalEmulator from '../views/TerminalEmulatorView.vue'
 
 const AUTH_STORAGE_KEY = 'sandbox_auth_key'
 
@@ -14,8 +15,13 @@ const router = createRouter({
     },
     {
       path: '/',
-      name: 'home',
-      component: HomeView,
+      name: 'CodeEditView',
+      component: CodeEditView,
+    },
+    {
+      path: '/terminal-emulator',
+      name: 'TerminalEmulator',
+      component: TerminalEmulator,
     },
   ],
 })
