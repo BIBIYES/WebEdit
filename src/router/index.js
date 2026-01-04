@@ -15,7 +15,7 @@ const router = createRouter({
     },
     {
       path: '/',
-      name: 'CodeEditView',
+      name: 'home',
       component: CodeEditView,
     },
     {

@@ -181,26 +181,40 @@ onMounted(() => {
       <p>数据量巨大且规则诡异，请在 O(N log N) 或更快的复杂度内解决。</p>
     </div> -->
     <div class="web-edit">
-      <div class="action">
-        <a-button :icon="h(CodeOutlined)" @click="isConsoleOpen = !isConsoleOpen"> 控制台</a-button>
-        <a-select v-model:value="codeType" style="width: 120px">
-          <a-select-option value="java">java</a-select-option>
-          <a-select-option value="c">c</a-select-option>
-          <a-select-option value="python">python</a-select-option>
-          <a-select-option value="nodejs">nodejs</a-select-option>
-        </a-select>
-        <a-button :icon="h(ArrowUpOutlined)" :loading="isSubmitting" @click="handleRun">
-          提交
-        </a-button>
-        <a-button :icon="h(LogoutOutlined)" @click="handleLogout">退出</a-button>
-        <a-button :icon="h(DesktopOutlined)" @click="handleOpenTerminal" style="margin-left: auto">
-          终端模拟器</a-button
-        >
+      <div class="header">
+        <div class="left">
+          <h2>代码编辑器</h2>
+        </div>
+        <div class="right">
+          <a-space size="middle">
+            <a-button type="text" :icon="h(CodeOutlined)" @click="isConsoleOpen = !isConsoleOpen"
+              >控制台</a-button
+            >
+            <a-select v-model:value="codeType" style="width: 120px" :bordered="false">
+              <a-select-option value="java">java</a-select-option>
+              <a-select-option value="c">c</a-select-option>
+              <a-select-option value="python">python</a-select-option>
+              <a-select-option value="nodejs">nodejs</a-select-option>
+            </a-select>
+            <a-button
+              type="primary"
+              :icon="h(ArrowUpOutlined)"
+              :loading="isSubmitting"
+              @click="handleRun"
+            >
+              提交
+            </a-button>
+            <a-divider type="vertical" style="border-color: var(--termius-border)" />
+            <a-button :icon="h(DesktopOutlined)" @click="handleOpenTerminal">终端模拟器</a-button>
+            <a-button danger :icon="h(LogoutOutlined)" @click="handleLogout">退出</a-button>
+          </a-space>
+        </div>
       </div>
       <div class="editor-pane">
         <WebEidt v-model="editorCode" :language="codeType" />
       </div>
       <div class="console" v-show="isConsoleOpen">
+        <!-- ... console content ... -->
         <div class="console-hander">
           <a-space><CodeOutlined />控制台</a-space>
           <span style="cursor: pointer" @click="isConsoleOpen = !isConsoleOpen"
@@ -215,6 +229,7 @@ onMounted(() => {
             v-for="log in runLogs"
             :key="log.id"
           >
+            <!-- ... log content ... -->
             <div class="console-log-header">
               <div class="console-log-title">
                 <span class="console-log-time">{{ formatTraceTime(log.time) }}</span>
@@ -247,18 +262,80 @@ onMounted(() => {
     </div>
   </div>
 </template>
-<style scoped>
+<style scoped lang="scss">
 .app {
   width: 100%;
   height: 100vh;
   display: flex;
+  background-color: var(--termius-bg);
+  color: var(--termius-text-primary);
 }
+
+.header {
+  padding: 20px 20px;
+  height: 50px;
+  background: var(--termius-header-bg);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--termius-border);
+
+  h2 {
+    margin: 0;
+    font-size: 16px;
+    color: var(--termius-text-primary);
+    font-weight: 500;
+    letter-spacing: 0.5px;
+  }
+}
+
+/* Ant Design Overrides for this View */
+:deep(.ant-btn-primary) {
+  background-color: var(--termius-accent);
+  border-color: var(--termius-accent);
+  color: #fff;
+  &:hover {
+    opacity: 0.9;
+  }
+}
+:deep(.ant-btn-text) {
+  color: var(--termius-text-secondary);
+  &:hover {
+    color: var(--termius-text-primary);
+    background: rgba(255, 255, 255, 0.05);
+  }
+}
+:deep(.ant-btn-default) {
+  background-color: transparent;
+  border-color: var(--termius-border);
+  color: var(--termius-text-primary);
+  &:hover {
+    border-color: var(--termius-accent);
+    color: var(--termius-accent);
+  }
+}
+:deep(.ant-btn-danger) {
+  color: #ff4d4f;
+  border-color: #ff4d4f;
+  &:hover {
+    color: #ff7875;
+    border-color: #ff7875;
+  }
+}
+:deep(.ant-select-selector) {
+  background-color: transparent !important;
+  color: var(--termius-text-primary) !important;
+}
+:deep(.ant-select-arrow) {
+  color: var(--termius-text-secondary);
+}
+
 .console {
   width: 100%;
   flex: 0 0 30%;
   min-height: 140px;
-  background-color: #fff8ee;
-  border-top: 3px #b39c84 solid;
+  background-color: var(--termius-panel-bg);
+  border-top: 1px solid var(--termius-border);
   display: flex;
   flex-direction: column;
 }
@@ -268,22 +345,22 @@ onMounted(() => {
   overflow: auto;
   font-size: 12px;
   line-height: 1.4;
-  color: #2b2620;
+  color: var(--termius-text-secondary);
   font-family: 'SFMono-Regular', Menlo, Consolas, 'Liberation Mono', monospace;
 }
 .console-empty {
-  color: #7b6e61;
+  color: var(--termius-text-dim);
 }
 .console-log {
-  border: 1px solid #e2d6c8;
+  border: 1px solid var(--termius-border);
   border-radius: 6px;
   padding: 8px;
-  background: #fffdf8;
+  background: var(--termius-input-bg);
   margin-bottom: 10px;
 }
 .console-log-error {
   border-color: #e4b3b3;
-  background: #fff3f3;
+  background: rgba(228, 179, 179, 0.1);
 }
 .console-log-header {
   display: flex;
@@ -291,7 +368,7 @@ onMounted(() => {
   align-items: center;
   gap: 8px;
   padding-bottom: 6px;
-  border-bottom: 1px dashed #e2d6c8;
+  border-bottom: 1px dashed var(--termius-border);
 }
 .console-log-title {
   display: flex;
@@ -300,14 +377,14 @@ onMounted(() => {
   font-size: 12px;
 }
 .console-log-time {
-  color: #4f4338;
+  color: var(--termius-text-secondary);
 }
 .console-log-status {
   font-weight: 600;
-  color: #3f3328;
+  color: var(--termius-accent);
 }
 .console-log-meta {
-  color: #6b5b4b;
+  color: var(--termius-text-dim);
 }
 .console-log-body {
   padding-top: 6px;
@@ -318,13 +395,14 @@ onMounted(() => {
 .console-log-label {
   text-transform: uppercase;
   letter-spacing: 1px;
-  color: #6b5b4b;
+  color: var(--termius-text-dim);
   font-size: 11px;
 }
 .console-log-output {
   margin: 4px 0 0 0;
   padding: 6px 8px;
-  background: #f4ede4;
+  background: var(--termius-bg);
+  color: var(--termius-text-primary);
   border-radius: 4px;
   white-space: pre-wrap;
   word-break: break-word;
@@ -334,19 +412,11 @@ onMounted(() => {
   font-size: 12px;
   text-transform: uppercase;
   letter-spacing: 1px;
-  color: #6b5b4b;
+  color: var(--termius-text-secondary);
   display: flex;
   justify-content: space-between;
-  border-bottom: 1px solid #e2d6c8;
-}
-.action {
-  width: 100%;
-  padding: 10px;
-  background-color: #f7f3ec;
-  border-bottom: 2px solid #e2d6c8;
-  display: flex;
-  align-items: center;
-  gap: 10px;
+  border-bottom: 1px solid var(--termius-border);
+  background-color: var(--termius-header-bg);
 }
 .console-close {
   visibility: hidden;
@@ -354,39 +424,41 @@ onMounted(() => {
 .problem-details {
   width: 30%;
   height: 100%;
-  background-color: #f7f3ec;
-  color: #2b2620;
+  background-color: var(--termius-panel-bg);
+  color: var(--termius-text-primary);
   padding: 20px 18px;
   overflow: auto;
   visibility: inherit;
 
   line-height: 1.6;
   font-size: 14px;
-  border-right: 3px #b39c84 solid;
+  border-right: 1px solid var(--termius-border);
 }
 .problem-details h2 {
   margin: 0 0 10px 0;
   font-size: 18px;
   letter-spacing: 0.5px;
+  color: var(--termius-accent);
 }
 .problem-details h3 {
   margin: 14px 0 6px 0;
   font-size: 14px;
   text-transform: uppercase;
   letter-spacing: 1px;
-  color: #6b5b4b;
+  color: var(--termius-text-secondary);
 }
 .problem-details p {
   margin: 0 0 8px 0;
 }
 .problem-details pre {
-  background: #1f1a16;
-  color: #f4e9da;
+  background: var(--termius-input-bg);
+  color: var(--termius-text-primary);
   padding: 10px 12px;
   border-radius: 6px;
   overflow: auto;
   font-family: 'SFMono-Regular', Menlo, Consolas, 'Liberation Mono', monospace;
   font-size: 12px;
+  border: 1px solid var(--termius-border);
 }
 
 .web-edit {

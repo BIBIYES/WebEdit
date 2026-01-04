@@ -9,3 +9,13 @@ export const healthCheck = () => {
 export const runCode = (payload) => {
   return request.post('/run', payload)
 }
+
+// 获取可用镜像列表
+export const sessionImages = () => {
+  return request.get('/session/images')
+}
+
+// 创建 Session 容器
+export const createSession = (payload) => {
+  return request.post('/session/create', payload)
+}

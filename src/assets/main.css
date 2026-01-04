@@ -3,3 +3,40 @@
   margin: 0;
   padding: 0;
 }
+
+:root {
+  /* Termius Dark Inspired Theme */
+  --termius-bg: #141729;
+  --termius-header-bg: #101221;
+  --termius-panel-bg: #1e2130;
+  --termius-accent: #22b568; /* Green from the prompt/UI */
+  --termius-text-primary: #ffffff;
+  --termius-text-secondary: #858a9d;
+  --termius-border: #2b2f40;
+  --termius-input-bg: #0d0f17;
+  --termius-hover: #292d3e;
+}
+
+/* Global Scrollbar Styling */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: #141729; /* Requested background */
+}
+
+::-webkit-scrollbar-thumb {
+  background: #2b2f40; /* --termius-border */
+  border-radius: 5px;
+  border: 2px solid #141729; /* Creates a padding effect */
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #3b4055;
+}
+
+::-webkit-scrollbar-corner {
+  background: #141729;
+}

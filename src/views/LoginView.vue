@@ -56,17 +56,17 @@ const handleLogin = async () => {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #f7f3ec;
+  background: var(--termius-bg);
   padding: 20px;
 }
 .login-card {
   width: 100%;
   max-width: 420px;
-  background: #fffdf8;
-  border: 2px solid #e2d6c8;
+  background: var(--termius-panel-bg);
+  border: 1px solid var(--termius-border);
   border-radius: 10px;
   padding: 28px;
-  box-shadow: 0 12px 30px rgba(79, 67, 56, 0.12);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.3);
   display: flex;
   flex-direction: column;
   gap: 14px;
@@ -74,13 +74,26 @@ const handleLogin = async () => {
 .login-title {
   font-size: 20px;
   font-weight: 600;
-  color: #2b2620;
+  color: var(--termius-text-primary);
 }
 .login-subtitle {
   font-size: 13px;
-  color: #6b5b4b;
+  color: var(--termius-text-secondary);
 }
 .login-button {
   width: 100%;
+  background-color: var(--termius-accent);
+  border-color: var(--termius-accent);
+}
+.login-button:hover {
+  opacity: 0.9;
+  background-color: var(--termius-accent);
+  border-color: var(--termius-accent);
+}
+
+:deep(.ant-input) {
+  background-color: var(--termius-input-bg);
+  border-color: var(--termius-border);
+  color: var(--termius-text-primary);
 }
 </style>
