@@ -162,5 +162,6 @@ onBeforeUnmount(() => {
 /* Override xterm scrollbar if needed */
 :deep(.xterm-viewport) {
   scrollbar-width: thin;
+  scrollbar-color: var(--termius-border) var(--termius-bg); /* thumb track */
 }
 </style>
