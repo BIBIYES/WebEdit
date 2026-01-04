@@ -78,20 +78,55 @@ const handleRun = async () => {
       code: editorCode.value,
     })
     const payload = res?.data || {}
-    const message = payload?.message || {}
-    const metadata = message?.metadata || {}
+
+    // Parse response according to new API docs
+    const rawMessage = payload?.message
     const traceId = payload?.traceId || `local_${Date.now()}`
     const traceDate = traceId.split('_')[0] || new Date().toISOString()
+
+    let stdout = ''
+    let stderr = ''
+    let exitCode = null
+    let oom = false
+
+    if (Array.isArray(rawMessage)) {
+      // Handle array response (standard execution)
+      const results = rawMessage
+
+      // If multiple results (multiple stdin cases), join them clearly
+      if (results.length > 1) {
+        stdout = results.map((r, i) => `--- Case ${i + 1} ---\n${r.stdout || ''}`).join('\n')
+        stderr = results.map((r, i) => `--- Case ${i + 1} ---\n${r.stderr || ''}`).join('\n')
+      } else if (results.length === 1) {
+        stdout = results[0].stdout || ''
+        stderr = results[0].stderr || ''
+      }
+
+      // Aggregate metadata
+      oom = results.some((r) => r.metadata?.oom)
+      const firstError = results.find((r) => r.metadata?.exitCode !== 0)
+      exitCode = firstError ? firstError.metadata.exitCode : (results[0]?.metadata?.exitCode ?? 0)
+    } else if (typeof rawMessage === 'string') {
+      // Handle string message (e.g. TIMEOUT)
+      stderr = rawMessage
+      exitCode = 1
+    } else {
+      // Fallback/Safety for unexpected format
+      stdout = rawMessage?.stdout || ''
+      stderr = rawMessage?.stderr || ''
+      exitCode = rawMessage?.metadata?.exitCode ?? null
+      oom = rawMessage?.metadata?.oom || false
+    }
 
     runLogs.value.push({
       id: traceId,
       traceId,
       time: traceDate,
       status: payload?.status || 'UNKNOWN',
-      exitCode: metadata?.exitCode ?? null,
-      oom: metadata?.oom ?? false,
-      stdout: message?.stdout || '',
-      stderr: message?.stderr || '',
+      exitCode,
+      oom,
+      stdout,
+      stderr,
     })
     notification.success({
       message: '提交成功',
